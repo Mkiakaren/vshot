@@ -9,7 +9,7 @@ const validTypes = ["ma", "mi", "p"];
 const typeIndex = rawArgs.findIndex((arg) => validTypes.includes(arg));
 
 if (typeIndex === -1) {
-  console.error('Usage: bv ma|mi|p "some message"');
+  console.error('Usage: vshot ma|mi|p "some message"');
   process.exit(1);
 }
 
@@ -20,7 +20,7 @@ const message = rawArgs
   .trim();
 
 if (!message) {
-  console.error('Please provide a commit message, e.g. bv p "some fix"');
+  console.error('Please provide a commit message, e.g. vshot p "some fix"');
   process.exit(1);
 }
 
