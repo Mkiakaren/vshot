@@ -5,6 +5,42 @@ import path from "path";
 import { execSync } from "child_process";
 
 const rawArgs = process.argv.slice(2);
+
+const selfPkg = JSON.parse(
+  fs.readFileSync(new URL("./package.json", import.meta.url), "utf8"),
+);
+
+if (rawArgs.length === 0 || rawArgs[0] === "-h" || rawArgs[0] === "--help") {
+  console.log(`
+  vshot ${selfPkg.version}
+
+  Bump semver, inject build metadata, and auto-commit — in one command.
+
+  Usage:
+    vshot <type> "<message>"
+
+  Types:
+    p   Patch  →  1.2.3 → 1.2.4
+    mi  Minor  →  1.2.3 → 1.3.0
+    ma  Major  →  1.2.3 → 2.0.0
+
+  Examples:
+    vshot p  "fix login bug"
+    vshot mi "add dark mode"
+    vshot ma "rewrite core engine"
+
+  Options:
+    -v, --version   Show vshot version
+    -h, --help      Show this help message
+  `);
+  process.exit(0);
+}
+
+if (rawArgs[0] === "-v" || rawArgs[0] === "--version") {
+  console.log(selfPkg.version);
+  process.exit(0);
+}
+
 const validTypes = ["ma", "mi", "p"];
 const typeIndex = rawArgs.findIndex((arg) => validTypes.includes(arg));
 
@@ -116,7 +152,9 @@ try {
   execSync("git add package.json", { stdio: "inherit" });
 
   if (hasStagedChanges) {
-    console.log("[vshot] Staged changes detected → committing only staged files.");
+    console.log(
+      "[vshot] Staged changes detected → committing only staged files.",
+    );
   } else {
     console.log("[vshot] No staged changes → staging everything.");
     execSync("git add .", { stdio: "inherit" });
