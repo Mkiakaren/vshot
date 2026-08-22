@@ -17,7 +17,8 @@ const typeArg = rawArgs[typeIndex];
 const message = rawArgs
   .slice(typeIndex + 1)
   .join(" ")
-  .trim();
+  .trim()
+  .replace(/^./, (c) => c.toUpperCase());
 
 if (!message) {
   console.error('Please provide a commit message, e.g. vshot p "some fix"');
