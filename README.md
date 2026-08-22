@@ -1,30 +1,52 @@
 # vshot
 
-Bump semver, inject build metadata, and auto-commit — in one command.
+**Bump semver, inject build metadata, and auto-commit — in one command.**
+
+`vshot` is a small CLI for projects that want versioning, build information, and Git commits handled together.
 
 ```bash
-vshot p "fix login bug"   # 1.2.3 → 1.2.4
+vshot p "fix login bug"
 ```
 
----
+This bumps:
 
-## Install
+```text
+1.2.3 → 1.2.4
+```
 
-### Global (recommended)
+and creates the commit:
 
-Install once, use in any project:
+```text
+1.2.4: fix login bug
+```
+
+## Installation
+
+### Global installation
+
+Install `vshot` globally:
 
 ```bash
 npm install -g vshot
 ```
 
-### Local (per project)
+After installation, use it directly in any project:
+
+```bash
+vshot p "fix login bug"
+vshot mi "add dark mode"
+vshot ma "rewrite core engine"
+```
+
+### Local installation
+
+Install `vshot` as a development dependency:
 
 ```bash
 npm install -D vshot
 ```
 
-Add to your `package.json` scripts:
+Then add a script to your project's `package.json`:
 
 ```json
 {
@@ -34,14 +56,18 @@ Add to your `package.json` scripts:
 }
 ```
 
-Then use:
+For example:
 
 ```bash
 npm run v p "fix login bug"
-pnpm v p "fix login bug"
 ```
 
----
+The same command works with other package managers:
+
+```bash
+pnpm v p "fix login bug"
+yarn v p "fix login bug"
+```
 
 ## Usage
 
@@ -49,11 +75,15 @@ pnpm v p "fix login bug"
 vshot <type> "<message>"
 ```
 
-| Type | Bump   | Example result     |
-|------|--------|--------------------|
-| `p`  | patch  | `1.2.3` → `1.2.4` |
-| `mi` | minor  | `1.2.3` → `1.3.0` |
-| `ma` | major  | `1.2.3` → `2.0.0` |
+### Version types
+
+| Type | Bump  | Example           |
+| ---- | ----- | ----------------- |
+| `p`  | Patch | `1.2.3` → `1.2.4` |
+| `mi` | Minor | `1.2.3` → `1.3.0` |
+| `ma` | Major | `1.2.3` → `2.0.0` |
+
+For example:
 
 ```bash
 vshot p  "fix login bug"
@@ -61,62 +91,117 @@ vshot mi "add dark mode"
 vshot ma "rewrite core engine"
 ```
 
----
+The message is used as the Git commit message.
+
+For example:
+
+```text
+1.3.0: add dark mode
+```
 
 ## What it does
 
-**1. Bumps the version** in your project's `package.json`
+### 1. Bumps the version
 
-**2. Injects build metadata** into `package.json`:
+`vshot` reads the current version from `package.json` and applies the requested semver bump.
+
+### 2. Adds build metadata
+
+`vshot` adds or updates `buildInfo` in `package.json`:
 
 ```json
-"buildInfo": {
-  "buildNumber": "260822.1430",
-  "buildEpoch": "1724330400",
-  "gitHash": "74b86cf",
-  "gitCommitEpoch": "1724330000"
+{
+  "buildInfo": {
+    "buildNumber": "260823.0110",
+    "buildEpoch": "1787429400",
+    "gitHash": "b1d887f",
+    "gitCommitEpoch": "1787429000"
+  }
 }
 ```
 
-| Field            | Description                        |
-|------------------|------------------------------------|
-| `buildNumber`    | `YYMMDD.HHmm` (UTC)                |
-| `buildEpoch`     | Unix timestamp of the build        |
-| `gitHash`        | Short SHA of the previous commit   |
-| `gitCommitEpoch` | Unix timestamp of the last commit  |
+The fields are:
 
-**3. Stages and commits** with smart detection:
+| Field            | Description                              |
+| ---------------- | ---------------------------------------- |
+| `buildNumber`    | Build date and time in `YYMMDD.HHmm` UTC |
+| `buildEpoch`     | Build timestamp as Unix time             |
+| `gitHash`        | Short hash of the current `HEAD` commit  |
+| `gitCommitEpoch` | Timestamp of the current `HEAD` commit   |
 
-- If you have **pre-staged files** → commits only those + `package.json`
-- If **nothing is staged** → stages everything and commits
+### 3. Creates the Git commit
 
-Commit message format:
+`vshot` automatically stages and commits the changes.
 
+Its staging behavior is:
+
+**When files are already staged**
+
+Only the existing staged changes and `package.json` are committed.
+
+**When nothing is staged**
+
+`vshot` stages all changes and commits them together with `package.json`.
+
+This lets you choose whether the commit should contain only selected changes or the entire working tree.
+
+## Example
+
+Suppose the current version is:
+
+```json
+{
+  "version": "1.2.3"
+}
 ```
-1.3.0: your message here
+
+Run:
+
+```bash
+vshot mi "add dark mode"
 ```
 
----
+`vshot` will:
 
-## Example output
+1. Change the version to `1.3.0`
+2. Add the build metadata
+3. Stage the required files
+4. Create a commit with:
 
+```text
+1.3.0: add dark mode
 ```
+
+Example output:
+
+```text
 [vshot] 1.2.3 → 1.3.0
-[vshot] Build: [260822.1430] Hash: [74b86cf]
+[vshot] Build: [260823.0110] Hash: [b1d887f]
 [vshot] No staged changes → staging everything.
 [main 2349338] 1.3.0: add dark mode
-  8 files changed, 212 insertions(+), 30 deletions(-)
+ 8 files changed, 212 insertions(+), 30 deletions(-)
 [vshot] Committed: "1.3.0: add dark mode"
 ```
 
----
+## Git
+
+Git is used to read build information and create the commit.
+
+If Git metadata cannot be read, `vshot` falls back to:
+
+```json
+{
+  "gitHash": "no-git",
+  "gitCommitEpoch": "0"
+}
+```
+
+The version and build metadata are still updated, but creating the commit requires Git.
 
 ## Requirements
 
-- Node.js >= 18
-- Git (optional — falls back gracefully if unavailable)
-
----
+- Node.js `>= 18`
+- Git for automatic commits
 
 ## License
 

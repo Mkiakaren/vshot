@@ -93,7 +93,7 @@ try {
     stdio: "pipe",
   }).trim();
 } catch {
-  console.warn("[bv] Warning: Git not available, using fallback values.");
+  console.warn("[vshot] Warning: Git not available, using fallback values.");
 }
 
 pkg.version = newVersion;
@@ -101,8 +101,8 @@ pkg.buildInfo = { buildNumber, buildEpoch, gitHash, gitCommitEpoch };
 
 fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n", "utf8");
 
-console.log(`[bv] ${prevVersion} → ${newVersion}`);
-console.log(`[bv] Build: [${buildNumber}] Hash: [${gitHash}]`);
+console.log(`[vshot] ${prevVersion} → ${newVersion}`);
+console.log(`[vshot] Build: [${buildNumber}] Hash: [${gitHash}]`);
 
 try {
   let hasStagedChanges = false;
@@ -115,16 +115,16 @@ try {
   execSync("git add package.json", { stdio: "inherit" });
 
   if (hasStagedChanges) {
-    console.log("[bv] Staged changes detected → committing only staged files.");
+    console.log("[vshot] Staged changes detected → committing only staged files.");
   } else {
-    console.log("[bv] No staged changes → staging everything.");
+    console.log("[vshot] No staged changes → staging everything.");
     execSync("git add .", { stdio: "inherit" });
   }
 
   const commitMsg = `${newVersion}: ${message}`;
   execSync(`git commit -m ${JSON.stringify(commitMsg)}`, { stdio: "inherit" });
-  console.log(`[bv] Committed: "${commitMsg}"`);
+  console.log(`[vshot] Committed: "${commitMsg}"`);
 } catch (err) {
-  console.error("[bv] Git commit failed:", err.message || err);
+  console.error("[vshot] Git commit failed:", err.message || err);
   process.exit(1);
 }
