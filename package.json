@@ -1,6 +1,6 @@
 {
   "name": "vshot",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Bump semver, inject build info, and auto-commit in one command",
   "type": "module",
   "bin": {
@@ -25,9 +25,9 @@
   },
   "license": "MIT",
   "buildInfo": {
-    "buildNumber": "260822.2143",
-    "buildEpoch": "1787435017",
-    "gitHash": "c9c6c17",
-    "gitCommitEpoch": "1787345980"
+    "buildNumber": "260822.2228",
+    "buildEpoch": "1787437722",
+    "gitHash": "ef41624",
+    "gitCommitEpoch": "1787435017"
   }
 }
