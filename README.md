@@ -2,51 +2,33 @@
 
 **Bump semver, inject build metadata, and auto-commit — in one command.**
 
-`vshot` is a small CLI for projects that want versioning, build information, and Git commits handled together.
-
 ```bash
 vshot p "fix login bug"
 ```
-
-This bumps:
 
 ```text
 1.2.3 → 1.2.4
 ```
 
-and creates the commit:
-
-```text
-1.2.4: fix login bug
-```
+---
 
 ## Installation
 
-### Global installation
-
-Install `vshot` globally:
+### Global
 
 ```bash
 npm install -g vshot
 ```
 
-After installation, use it directly in any project:
-
 ```bash
 vshot p "fix login bug"
-vshot mi "add dark mode"
-vshot ma "rewrite core engine"
 ```
 
-### Local installation
-
-Install `vshot` as a development dependency:
+### Local
 
 ```bash
 npm install -D vshot
 ```
-
-Then add a script to your project's `package.json`:
 
 ```json
 {
@@ -56,26 +38,21 @@ Then add a script to your project's `package.json`:
 }
 ```
 
-For example:
-
 ```bash
 npm run v p "fix login bug"
+pnpm v  p "fix login bug"
+yarn v  p "fix login bug"
 ```
 
-The same command works with other package managers:
-
-```bash
-pnpm v p "fix login bug"
-yarn v p "fix login bug"
-```
+---
 
 ## Usage
 
 ```bash
-vshot <type> "<message>"
+vshot <type> "<message>" [flags]
 ```
 
-### Version types
+### Version Types
 
 | Type | Bump  | Example           |
 | ---- | ----- | ----------------- |
@@ -83,36 +60,51 @@ vshot <type> "<message>"
 | `mi` | Minor | `1.2.3` → `1.3.0` |
 | `ma` | Major | `1.2.3` → `2.0.0` |
 
-For example:
+### Flags
+
+| Flag            | Description                               |
+| --------------- | ----------------------------------------- |
+| `--tag`         | Create an annotated Git tag (`vX.Y.Z`)    |
+| `--push`        | Push commit and tag to `origin`           |
+| `--no-commit`   | Skip all Git operations                   |
+| `--changelog`   | Prepend a release entry to `CHANGELOG.md` |
+| `--dry-run`     | Preview everything without writing        |
+| `-v, --version` | Print vshot version                       |
+| `-h, --help`    | Show help screen                          |
+
+---
+
+## Interactive Mode
+
+If you run `vshot` without a type argument, it enters interactive mode and prompts you:
 
 ```bash
-vshot p  "fix login bug"
-vshot mi "add dark mode"
-vshot ma "rewrite core engine"
+vshot
 ```
-
-The message is used as the Git commit message.
-
-For example:
 
 ```text
-1.3.0: add dark mode
+  No type given — interactive mode
+
+  Bump type (ma/mi/p) → p
+  Commit message → fix null pointer in auth
 ```
 
-## What it does
+---
 
-### 1. Bumps the version
+## What It Does
 
-`vshot` reads the current version from `package.json` and applies the requested semver bump.
+### 1. Bumps the Version
 
-### 2. Adds build metadata
+Reads `package.json`, applies the semver bump, and writes it back.
 
-`vshot` adds or updates `buildInfo` in `package.json`:
+### 2. Injects Build Metadata
+
+Adds or updates `buildInfo` in `package.json`:
 
 ```json
 {
   "buildInfo": {
-    "buildNumber": "260823.0110",
+    "buildNumber": "260831.1420",
     "buildEpoch": "1787429400",
     "gitHash": "b1d887f",
     "gitCommitEpoch": "1787429000"
@@ -120,74 +112,131 @@ For example:
 }
 ```
 
-The fields are:
-
 | Field            | Description                              |
 | ---------------- | ---------------------------------------- |
 | `buildNumber`    | Build date and time in `YYMMDD.HHmm` UTC |
 | `buildEpoch`     | Build timestamp as Unix time             |
-| `gitHash`        | Short hash of the current `HEAD` commit  |
+| `gitHash`        | Short hash of the current `HEAD`         |
 | `gitCommitEpoch` | Timestamp of the current `HEAD` commit   |
 
-### 3. Creates the Git commit
+### 3. Commits
 
-`vshot` automatically stages and commits the changes.
+Stages and commits changes automatically.
 
-Its staging behavior is:
+| Scenario             | Behavior                                       |
+| -------------------- | ---------------------------------------------- |
+| Nothing staged       | Stages everything and commits                  |
+| Files already staged | Commits only the staged files + `package.json` |
+| `--changelog` active | Also stages `CHANGELOG.md`                     |
+| `--no-commit`        | Writes files only — no Git operations          |
 
-**When files are already staged**
+### 4. Tags
 
-Only the existing staged changes and `package.json` are committed.
-
-**When nothing is staged**
-
-`vshot` stages all changes and commits them together with `package.json`.
-
-This lets you choose whether the commit should contain only selected changes or the entire working tree.
-
-## Example
-
-Suppose the current version is:
-
-```json
-{
-  "version": "1.2.3"
-}
-```
-
-Run:
+`--tag` creates an annotated Git tag:
 
 ```bash
-vshot mi "add dark mode"
+vshot mi "add dark mode" --tag
 ```
-
-`vshot` will:
-
-1. Change the version to `1.3.0`
-2. Add the build metadata
-3. Stage the required files
-4. Create a commit with:
 
 ```text
-1.3.0: add dark mode
+Annotated tag  v1.3.0
 ```
 
-Example output:
+If the tag already exists, it is skipped with a warning instead of failing.
+
+### 5. Push
+
+`--push` pushes the branch and (if `--tag` is set) the tag to `origin`:
+
+```bash
+vshot mi "add dark mode" --tag --push
+```
+
+Requires a remote named `origin`. vshot validates this during pre-flight checks and exits early if it is missing.
+
+### 6. Changelog
+
+`--changelog` prepends a release entry to `CHANGELOG.md` (created if it does not exist):
+
+```bash
+vshot mi "add dark mode" --changelog
+```
+
+```md
+## [1.3.0] - 2026-08-31
+
+### Minor
+
+- Add dark mode
+```
+
+New entries are always inserted above existing entries, preserving history.
+
+### 7. Dry Run
+
+`--dry-run` runs the entire pipeline and prints every step without writing anything to disk or Git:
+
+```bash
+vshot ma "rewrite core" --tag --push --changelog --dry-run
+```
 
 ```text
-[vshot] 1.2.3 → 1.3.0
-[vshot] Build: [260823.0110] Hash: [b1d887f]
-[vshot] No staged changes → staging everything.
-[main 2349338] 1.3.0: add dark mode
- 8 files changed, 212 insertions(+), 30 deletions(-)
-[vshot] Committed: "1.3.0: add dark mode"
+  DRY RUN — nothing will be written
+
+  [1/6] Pre-flight checks
+     ✓ package.json  v1.2.3
+     ✓ Git  main @ b1d887f
+
+  [2/6] Computing version bump
+     build:  major  1.2.3 → 2.0.0
+
+  [3/6] Writing package.json  [dry-run]
+     ✓ version   1.2.3 → 2.0.0
+
+  [4/6] Updating CHANGELOG.md  [dry-run]
+     ✓ [2.0.0] entry prepended  2026-08-31
+
+  [5/6] Committing changes  [dry-run]
+     ✓ Would commit: "2.0.0: Rewrite core"
+
+  [6/6] Creating annotated tag  [dry-run]
+     ✓ Would create annotated tag v2.0.0
 ```
 
-## Git
+---
 
-Git is used to read build information and create the commit.
+## Pre-flight Checks
 
-If Git metadata cannot be read, `vshot` falls back to:
+Before writing anything, vshot validates:
+
+- `package.json` exists and contains a valid semver `version`
+- Git is available and reports the current branch and hash
+- The working tree state (dirty/clean) is displayed
+- A remote named `origin` exists when `--push` is used
+
+---
+
+## npm Lifecycle Hooks
+
+If `package.json` defines `preversion` or `postversion` scripts, vshot runs them automatically at the appropriate points (skipped in `--dry-run` mode).
+
+---
+
+## Examples
+
+```bash
+vshot p  "fix auth null pointer"
+vshot mi "add dark mode" --tag --push
+vshot ma "rewrite core" --tag --push --changelog
+vshot p  "test change" --dry-run
+vshot mi "bump deps" --no-commit
+```
+
+---
+
+## Git Fallback
+
+If Git is not available, `gitHash` and `gitCommitEpoch` fall back to safe defaults:
 
 ```json
 {
@@ -196,12 +245,16 @@ If Git metadata cannot be read, `vshot` falls back to:
 }
 ```
 
-The version and build metadata are still updated, but creating the commit requires Git.
+The version bump and `buildInfo` are still written. Git operations (`--tag`, `--push`, commit) are silently disabled.
+
+---
 
 ## Requirements
 
 - Node.js `>= 18`
-- Git for automatic commits
+- Git for commit, tag, and push operations
+
+---
 
 ## License
 
