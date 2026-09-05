@@ -1,13 +1,31 @@
 # vshot
 
-**Bump semver, inject build metadata, and auto-commit — in one command.**
+[![npm](https://img.shields.io/npm/v/vshot.svg)](https://www.npmjs.com/package/vshot)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D18-339933.svg)](https://nodejs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Downloads](https://img.shields.io/npm/dm/vshot.svg)](https://www.npmjs.com/package/vshot)
+
+**The tiny release CLI for Node.js.**
+
+Version + build metadata + Git release in one command.
 
 ```bash
-vshot p "fix login bug"
+npm install -g vshot
+```
+
+```bash
+vshot p "fix auth bug"
 ```
 
 ```text
 1.2.3 → 1.2.4
+
+✓ package.json
+✓ build metadata
+✓ git commit
+✓ git tag
+✓ git push
+✓ changelog
 ```
 
 ---
@@ -43,6 +61,32 @@ npm run v p "fix login bug"
 pnpm v  p "fix login bug"
 yarn v  p "fix login bug"
 ```
+
+---
+
+## Why vshot?
+
+If `npm version` is too basic and `release-it` is too much, vshot gives you a tiny release workflow with build metadata. No config file, no plugins, no dependencies.
+
+- **Zero dependencies** — just Node.js and Git
+- **Build metadata** — `buildNumber`, `buildEpoch`, `gitHash`, and `gitCommitEpoch` injected into `package.json`
+- **Git workflow** — commit, tag, and push in one command
+- **Changelog** — auto-prepend release entries to `CHANGELOG.md`
+- **Dry run** — preview every step before writing
+- **Interactive mode** — prompts when run without arguments
+
+## vshot vs alternatives
+
+| Feature           | vshot | npm version | bumpp | release-it |
+| ----------------- | ----: | ----------: | ----: | ---------: |
+| Semver bump       |     ✓ |           ✓ |     ✓ |          ✓ |
+| Build metadata    |     ✓ |           — |     — |          — |
+| Git commit        |     ✓ |           ✓ |     ✓ |          ✓ |
+| Tag               |     ✓ |           ✓ |     ✓ |          ✓ |
+| Push              |     ✓ |           — |     ✓ |          ✓ |
+| Changelog         |     ✓ |           — |     — |          ✓ |
+| Zero dependencies |     ✓ |           — |    ✓? |          — |
+| Tiny CLI          |     ✓ |           — |     — |          — |
 
 ---
 

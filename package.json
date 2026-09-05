@@ -1,7 +1,7 @@
 {
   "name": "vshot",
-  "version": "1.1.0",
-  "description": "Bump semver, inject build info, and auto-commit in one command",
+  "version": "1.2.0",
+  "description": "Fast release CLI for Node.js: bump semver, generate build metadata, commit, tag, push, and update your changelog in one command.",
   "type": "module",
   "bin": {
     "vshot": "./version.mjs"
@@ -14,9 +14,19 @@
   },
   "keywords": [
     "version",
-    "bump",
+    "versioning",
+    "version-bump",
+    "bump-version",
     "semver",
+    "release",
+    "release-cli",
+    "release-automation",
+    "build-number",
+    "build-metadata",
     "git",
+    "git-release",
+    "git-tag",
+    "npm",
     "cli"
   ],
   "repository": {
@@ -25,9 +35,9 @@
   },
   "license": "MIT",
   "buildInfo": {
-    "buildNumber": "260830.2339",
-    "buildEpoch": "1788133194",
-    "gitHash": "a0fdc31",
-    "gitCommitEpoch": "1787438259"
+    "buildNumber": "260905.0659",
+    "buildEpoch": "1788591541",
+    "gitHash": "bab1d9e",
+    "gitCommitEpoch": "1788133195"
   }
 }
